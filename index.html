@@ -1,1 +1,60 @@
-<!DOCTYPE html><html><body><h1>App Motorista</h1></body></html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Motorista - Monitoramento</title>
+<link rel="manifest" href="manifest.json">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body>
+<h2>App Motorista - Monitoramento</h2>
+<form id="form">
+  <label>Pedido:</label><br>
+  <input type="text" id="pedido" required><br>
+  <label>Nome ou Placa:</label><br>
+  <input type="text" id="nome" required><br>
+  <button type="submit">Iniciar</button>
+  <button type="button" id="stop">Parar</button>
+</form>
+<div id="status"></div>
+<script>
+const firebaseConfig = {
+ apiKey: "AIzaSyCc7_HnK38yhjpOD1u3oEvO_plyhtPQbOY",
+ authDomain: "monitoramento-de-pedidos.firebaseapp.com",
+ databaseURL: "https://monitoramento-de-pedidos-default-rtdb.firebaseio.com",
+ projectId: "monitoramento-de-pedidos",
+ storageBucket: "monitoramento-de-pedidos.appspot.com",
+ messagingSenderId: "201304271658",
+ appId: "1:201304271658:web:10ff2cc9eb62192a380c53"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let watchId = null;
+document.getElementById('form').addEventListener('submit', e => {
+ e.preventDefault();
+ const pedido = document.getElementById('pedido').value;
+ const nome = document.getElementById('nome').value;
+ watchId = navigator.geolocation.watchPosition(pos => {
+   db.ref('motoristas/' + pedido).set({
+     nome: nome,
+     pedido: pedido,
+     lat: pos.coords.latitude,
+     lng: pos.coords.longitude,
+     timestamp: Date.now()
+   });
+   document.getElementById('status').innerText = "Enviando localização...";
+ });
+});
+document.getElementById('stop').addEventListener('click', () => {
+ if (watchId) {
+   navigator.geolocation.clearWatch(watchId);
+   watchId = null;
+   document.getElementById('status').innerText = "Parado";
+ }
+});
+</script>
+</body>
+</html>

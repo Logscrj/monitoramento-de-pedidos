@@ -1,1 +1,41 @@
-<!DOCTYPE html><html><body><h1>Rastreamento Individual</h1></body></html>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rastreamento</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>html, body, #map { height: 100%; margin: 0; }</style>
+</head>
+<body>
+<h3>Rastreamento Individual</h3>
+<div id="map"></div>
+<script>
+const firebaseConfig = {
+ apiKey: "AIzaSyCc7_HnK38yhjpOD1u3oEvO_plyhtPQbOY",
+ authDomain: "monitoramento-de-pedidos.firebaseapp.com",
+ databaseURL: "https://monitoramento-de-pedidos-default-rtdb.firebaseio.com",
+ projectId: "monitoramento-de-pedidos",
+ storageBucket: "monitoramento-de-pedidos.appspot.com",
+ messagingSenderId: "201304271658",
+ appId: "1:201304271658:web:10ff2cc9eb62192a380c53"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const urlParams = new URLSearchParams(window.location.search);
+const pedido = urlParams.get('pedido');
+const map = L.map('map').setView([-23.55, -46.63], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'Map' }).addTo(map);
+db.ref('motoristas/' + pedido).on('value', snap => {
+ const data = snap.val();
+ if (data) {
+   map.eachLayer(layer => { if (layer instanceof L.Marker) map.removeLayer(layer); });
+   L.marker([data.lat, data.lng]).addTo(map).bindPopup(`${data.nome} - Pedido ${data.pedido}`);
+ }
+});
+</script>
+</body>
+</html>
